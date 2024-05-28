@@ -2,6 +2,7 @@
 #include <iostream>
 #include <webgpu/webgpu_cpp.h>
 #include <webgpu/webgpu_glfw.h>
+#include <shader.h>
 
 const uint32_t kWidth = 512;
 const uint32_t kHeight = 512;
@@ -33,27 +34,14 @@ const char shaderCode[] = R"(
 )";
 
 void CreateRenderPipeline() {
-  wgpu::ShaderModuleWGSLDescriptor wgslDesc{};
-  wgslDesc.code = shaderCode;
+  Shader shader = Shader(device, shaderCode);
 
-  wgpu::ShaderModuleDescriptor shaderModuleDescriptor{
-    .nextInChain = &wgslDesc
-  };
-  wgpu::ShaderModule shaderModule = device.CreateShaderModule(&shaderModuleDescriptor);
-
-  wgpu::ColorTargetState colorTargetState{
-    .format = wgpu::TextureFormat::BGRA8Unorm
-  };
-
-  wgpu::FragmentState fragmentState{
-    .module = shaderModule,
-    .targetCount = 1,
-    .targets = &colorTargetState
-  };
-
-  wgpu::RenderPipelineDescriptor descriptor{
-    .vertex = {.module = shaderModule},
-    .fragment = &fragmentState
+  wgpu::RenderPipelineDescriptor descriptor
+  {
+    .vertex = {
+      .module = shader.GetModule()
+    },
+    .fragment = shader.GetFragmentState()
   };
 
   pipeline = device.CreateRenderPipeline(&descriptor);
@@ -65,13 +53,18 @@ void InitGraphics(wgpu::Surface surface) {
 }
 
 void Render() {
-  wgpu::RenderPassColorAttachment attachment{
-      .view = swapChain.GetCurrentTextureView(),
-      .loadOp = wgpu::LoadOp::Clear,
-      .storeOp = wgpu::StoreOp::Store};
+  wgpu::RenderPassColorAttachment attachment
+  {
+    .view = swapChain.GetCurrentTextureView(),
+    .loadOp = wgpu::LoadOp::Clear,
+    .storeOp = wgpu::StoreOp::Store
+  };
 
-  wgpu::RenderPassDescriptor renderpass{.colorAttachmentCount = 1,
-                                        .colorAttachments = &attachment};
+  wgpu::RenderPassDescriptor renderpass
+  {
+    .colorAttachmentCount = 1,
+    .colorAttachments = &attachment
+  };
 
   wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
   wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderpass);
