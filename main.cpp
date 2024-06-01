@@ -34,14 +34,34 @@ const char shaderCode[] = R"(
 )";
 
 void CreateRenderPipeline() {
-  Shader shader = Shader(device, shaderCode);
+  wgpu::ShaderModuleWGSLDescriptor wgslDesc{};
+  wgslDesc.code = shaderCode;
+
+  wgpu::ShaderModuleDescriptor shaderModuleDescriptor
+  {
+    .nextInChain = &wgslDesc
+  };
+  
+  wgpu::ShaderModule shaderModule = device.CreateShaderModule(&shaderModuleDescriptor);
+
+  wgpu::ColorTargetState colorTargetState
+  {
+    .format = wgpu::TextureFormat::BGRA8Unorm
+  };
+
+  wgpu::FragmentState fragmentState =
+  {
+    .module = shaderModule,
+    .targetCount = 1,
+    .targets = &colorTargetState
+  };
 
   wgpu::RenderPipelineDescriptor descriptor
   {
     .vertex = {
-      .module = shader.GetModule()
+      .module = shaderModule
     },
-    .fragment = shader.GetFragmentState()
+    .fragment = &fragmentState
   };
 
   pipeline = device.CreateRenderPipeline(&descriptor);
