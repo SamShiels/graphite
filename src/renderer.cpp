@@ -3,8 +3,8 @@
 #include "wgpu_utils.h"
 
 Renderer::Renderer(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeight) {
-  this->surface = wgpu::glfw::CreateSurfaceForWindow(instance, window);
   this->instance = wgpu::CreateInstance();
+  this->surface = wgpu::glfw::CreateSurfaceForWindow(instance, window);
   device = GetDeviceSync(instance);
   SetupSwapChain(windowWidth, windowHeight);
   CreatePipeline();
