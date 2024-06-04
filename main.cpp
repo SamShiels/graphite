@@ -9,14 +9,6 @@ const uint32_t kWidth = 512;
 const uint32_t kHeight = 512;
 
 int main() {
-  wgpu::Instance instance = wgpu::CreateInstance();
-
-  // GetDevice([](wgpu::Device dev) {
-  //   device = dev;
-  //   Start();
-  // });
-
-
   if (!glfwInit()) {
     return 1;
   }
@@ -25,8 +17,7 @@ int main() {
   GLFWwindow* window =
       glfwCreateWindow(kWidth, kHeight, "WebGPU window", nullptr, nullptr);
 
-  wgpu::Surface surface = wgpu::glfw::CreateSurfaceForWindow(instance, window);
-  Renderer* renderer = new Renderer(instance, surface, kWidth, kHeight);
+  Renderer* renderer = new Renderer(window, kWidth, kHeight);
 
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
@@ -34,4 +25,5 @@ int main() {
   }
 
   delete renderer;
+  delete window;
 }

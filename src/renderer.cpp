@@ -1,10 +1,12 @@
+#include <webgpu/webgpu_glfw.h>
 #include <renderer.h>
 #include "wgpu_utils.h"
 
-Renderer::Renderer(wgpu::Instance instance, wgpu::Surface surface, uint32_t windowWidth, uint32_t windowHeight) {
-  this->instance = instance;
+Renderer::Renderer(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeight) {
+  this->surface = wgpu::glfw::CreateSurfaceForWindow(instance, window);
+  this->instance = wgpu::CreateInstance();
   device = GetDeviceSync(instance);
-  SetupSwapChain(surface, windowWidth, windowHeight);
+  SetupSwapChain(windowWidth, windowHeight);
   CreatePipeline();
 }
 
@@ -34,7 +36,7 @@ void Renderer::Render() {
   instance.ProcessEvents();
 }
 
-void Renderer::SetupSwapChain(wgpu::Surface surface, uint32_t windowWidth, uint32_t windowHeight) {
+void Renderer::SetupSwapChain(uint32_t windowWidth, uint32_t windowHeight) {
   wgpu::SwapChainDescriptor scDesc{
     .usage = wgpu::TextureUsage::RenderAttachment,
     .format = wgpu::TextureFormat::BGRA8Unorm,
@@ -91,5 +93,5 @@ void Renderer::CreatePipeline() {
 }
 
 Renderer::~Renderer() {
-
+  
 }

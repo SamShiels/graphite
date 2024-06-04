@@ -2,7 +2,7 @@
 
 class Renderer {
   public:
-    Renderer(wgpu::Instance instance, wgpu::Surface surface, uint32_t windowWidth, uint32_t windowHeight);
+    Renderer(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeight);
     void Render();
     ~Renderer();
 
@@ -10,7 +10,8 @@ class Renderer {
     wgpu::Instance instance;
     wgpu::Device device;
     wgpu::SwapChain swapChain;
+    wgpu::Surface surface;
     wgpu::RenderPipeline pipeline;
     void CreatePipeline();
-    void SetupSwapChain(wgpu::Surface surface, uint32_t windowWidth, uint32_t windowHeight);
+    void SetupSwapChain(uint32_t windowWidth, uint32_t windowHeight);
 };
