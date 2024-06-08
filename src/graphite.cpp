@@ -14,7 +14,6 @@ class Internal {
     wgpu::SwapChain swapChain;
     wgpu::Surface surface;
     wgpu::RenderPipeline pipeline;
-    void CreatePipeline();
     void SetupSwapChain(uint32_t windowWidth, uint32_t windowHeight);
 };
 
@@ -33,7 +32,19 @@ Internal::Internal(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeig
   this->surface = wgpu::glfw::CreateSurfaceForWindow(instance, window);
   device = GetDeviceSync(instance);
   SetupSwapChain(windowWidth, windowHeight);
-  CreatePipeline();
+
+  char shaderCode[] = R"(
+    @vertex fn vertexMain(@builtin(vertex_index) i : u32) ->
+      @builtin(position) vec4f {
+        const pos = array(vec2f(0, 1), vec2f(-1, -1), vec2f(1, -1));
+        return vec4f(pos[i], 0, 1);
+    }
+    @fragment fn fragmentMain() -> @location(0) vec4f {
+        return vec4f(1, 0, 0, 1);
+    }
+  )";
+
+  this->pipeline = CreateRenderPipeline(device, shaderCode);
 }
 
 void Internal::Render() {
@@ -70,52 +81,6 @@ void Internal::SetupSwapChain(uint32_t windowWidth, uint32_t windowHeight) {
     .height = windowHeight,
     .presentMode = wgpu::PresentMode::Fifo};
   swapChain = device.CreateSwapChain(surface, &scDesc);
-}
-
-void Internal::CreatePipeline() {
-  wgpu::ShaderModuleWGSLDescriptor wgslDesc{};
-
-  char shaderCode[] = R"(
-    @vertex fn vertexMain(@builtin(vertex_index) i : u32) ->
-      @builtin(position) vec4f {
-        const pos = array(vec2f(0, 1), vec2f(-1, -1), vec2f(1, -1));
-        return vec4f(pos[i], 0, 1);
-    }
-    @fragment fn fragmentMain() -> @location(0) vec4f {
-        return vec4f(1, 0, 0, 1);
-    }
-  )";
-
-  wgslDesc.code = shaderCode;
-
-  wgpu::ShaderModuleDescriptor shaderModuleDescriptor
-  {
-    .nextInChain = &wgslDesc
-  };
-  
-  wgpu::ShaderModule shaderModule = device.CreateShaderModule(&shaderModuleDescriptor);
-
-  wgpu::ColorTargetState colorTargetState
-  {
-    .format = wgpu::TextureFormat::BGRA8Unorm
-  };
-
-  wgpu::FragmentState fragmentState =
-  {
-    .module = shaderModule,
-    .targetCount = 1,
-    .targets = &colorTargetState
-  };
-
-  wgpu::RenderPipelineDescriptor descriptor
-  {
-    .vertex = {
-      .module = shaderModule
-    },
-    .fragment = &fragmentState
-  };
-
-  this->pipeline = device.CreateRenderPipeline(&descriptor);
 }
 
 Internal::~Internal() {
