@@ -2,7 +2,33 @@
 #include <graphite.h>
 #include "wgpu_utils.h"
 
-Graphite::Graphite(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeight) {
+class Internal {
+  public:
+    Internal(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeight);
+    void Render();
+    ~Internal();
+
+  private:
+    wgpu::Instance instance;
+    wgpu::Device device;
+    wgpu::SwapChain swapChain;
+    wgpu::Surface surface;
+    wgpu::RenderPipeline pipeline;
+    void CreatePipeline();
+    void SetupSwapChain(uint32_t windowWidth, uint32_t windowHeight);
+};
+
+Graphite::Graphite(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeight) : internal(new Internal(window, windowWidth, windowHeight)) {}
+
+void Graphite::Render() {
+  internal->Render();
+}
+
+Graphite::~Graphite() {
+  delete internal;
+}
+
+Internal::Internal(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeight) {
   this->instance = wgpu::CreateInstance();
   this->surface = wgpu::glfw::CreateSurfaceForWindow(instance, window);
   device = GetDeviceSync(instance);
@@ -10,7 +36,7 @@ Graphite::Graphite(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeig
   CreatePipeline();
 }
 
-void Graphite::Render() {
+void Internal::Render() {
   wgpu::RenderPassColorAttachment attachment
   {
     .view = swapChain.GetCurrentTextureView(),
@@ -36,7 +62,7 @@ void Graphite::Render() {
   instance.ProcessEvents();
 }
 
-void Graphite::SetupSwapChain(uint32_t windowWidth, uint32_t windowHeight) {
+void Internal::SetupSwapChain(uint32_t windowWidth, uint32_t windowHeight) {
   wgpu::SwapChainDescriptor scDesc{
     .usage = wgpu::TextureUsage::RenderAttachment,
     .format = wgpu::TextureFormat::BGRA8Unorm,
@@ -46,7 +72,7 @@ void Graphite::SetupSwapChain(uint32_t windowWidth, uint32_t windowHeight) {
   swapChain = device.CreateSwapChain(surface, &scDesc);
 }
 
-void Graphite::CreatePipeline() {
+void Internal::CreatePipeline() {
   wgpu::ShaderModuleWGSLDescriptor wgslDesc{};
 
   char shaderCode[] = R"(
@@ -92,6 +118,6 @@ void Graphite::CreatePipeline() {
   this->pipeline = device.CreateRenderPipeline(&descriptor);
 }
 
-Graphite::~Graphite() {
+Internal::~Internal() {
   
 }
