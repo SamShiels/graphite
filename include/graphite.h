@@ -1,10 +1,13 @@
+#ifndef GRAPHITE_H
+#define GRAPHITE_H
+
 #include <webgpu/webgpu_cpp.h>
 
-class Renderer {
+class Graphite {
   public:
-    Renderer(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeight);
+    Graphite(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeight);
     void Render();
-    ~Renderer();
+    ~Graphite();
 
   private:
     wgpu::Instance instance;
@@ -15,3 +18,5 @@ class Renderer {
     void CreatePipeline();
     void SetupSwapChain(uint32_t windowWidth, uint32_t windowHeight);
 };
+
+#endif

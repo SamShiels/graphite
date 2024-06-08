@@ -1,8 +1,8 @@
 #include <webgpu/webgpu_glfw.h>
-#include <renderer.h>
+#include <graphite.h>
 #include "wgpu_utils.h"
 
-Renderer::Renderer(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeight) {
+Graphite::Graphite(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeight) {
   this->instance = wgpu::CreateInstance();
   this->surface = wgpu::glfw::CreateSurfaceForWindow(instance, window);
   device = GetDeviceSync(instance);
@@ -10,7 +10,7 @@ Renderer::Renderer(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeig
   CreatePipeline();
 }
 
-void Renderer::Render() {
+void Graphite::Render() {
   wgpu::RenderPassColorAttachment attachment
   {
     .view = swapChain.GetCurrentTextureView(),
@@ -36,7 +36,7 @@ void Renderer::Render() {
   instance.ProcessEvents();
 }
 
-void Renderer::SetupSwapChain(uint32_t windowWidth, uint32_t windowHeight) {
+void Graphite::SetupSwapChain(uint32_t windowWidth, uint32_t windowHeight) {
   wgpu::SwapChainDescriptor scDesc{
     .usage = wgpu::TextureUsage::RenderAttachment,
     .format = wgpu::TextureFormat::BGRA8Unorm,
@@ -46,7 +46,7 @@ void Renderer::SetupSwapChain(uint32_t windowWidth, uint32_t windowHeight) {
   swapChain = device.CreateSwapChain(surface, &scDesc);
 }
 
-void Renderer::CreatePipeline() {
+void Graphite::CreatePipeline() {
   wgpu::ShaderModuleWGSLDescriptor wgslDesc{};
 
   char shaderCode[] = R"(
@@ -89,9 +89,9 @@ void Renderer::CreatePipeline() {
     .fragment = &fragmentState
   };
 
-  pipeline = device.CreateRenderPipeline(&descriptor);
+  this->pipeline = device.CreateRenderPipeline(&descriptor);
 }
 
-Renderer::~Renderer() {
+Graphite::~Graphite() {
   
 }
