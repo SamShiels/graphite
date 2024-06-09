@@ -4,6 +4,6 @@
 #include <webgpu/webgpu_cpp.h>
 
 wgpu::Device GetDeviceSync(wgpu::Instance instance);
-wgpu::RenderPipeline CreateRenderPipeline(wgpu::Device device, const char* shaderCode);
+wgpu::RenderPipeline CreateRenderPipeline(wgpu::Device device, const char* vertexShaderCode, const char* fragmentShaderCode);
 
 #endif

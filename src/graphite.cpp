@@ -33,18 +33,21 @@ Internal::Internal(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeig
   device = GetDeviceSync(instance);
   SetupSwapChain(windowWidth, windowHeight);
 
-  char shaderCode[] = R"(
+  const char* vertexShaderCode = R"(
     @vertex fn vertexMain(@builtin(vertex_index) i : u32) ->
       @builtin(position) vec4f {
         const pos = array(vec2f(0, 1), vec2f(-1, -1), vec2f(1, -1));
         return vec4f(pos[i], 0, 1);
     }
+  )";
+
+  const char* fragmentShaderCode = R"(
     @fragment fn fragmentMain() -> @location(0) vec4f {
         return vec4f(1, 0, 0, 1);
     }
   )";
 
-  this->pipeline = CreateRenderPipeline(device, shaderCode);
+  this->pipeline = CreateRenderPipeline(device, vertexShaderCode, fragmentShaderCode);
 }
 
 void Internal::Render() {
