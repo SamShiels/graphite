@@ -3,6 +3,7 @@
 #include "wgpu_utils.h"
 #include <iostream>
 #include "renderGroup/renderGroup.h"
+#include "embedded_shaders.h"
 
 class Internal {
   public:
@@ -41,21 +42,21 @@ Internal::Internal(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeig
 
   SetupSwapChain(windowWidth, windowHeight);
 
-  const char* vertexShaderCode = R"(
-    @vertex
-    fn main(@location(0) position: vec2<f32>) -> @builtin(position) vec4<f32> {
-      return vec4<f32>(position, 0.0, 1.0);
-    }
-  )";
+  // const char* vertexShaderCode = R"(
+  //   @vertex
+  //   fn main(@location(0) position: vec2<f32>) -> @builtin(position) vec4<f32> {
+  //     return vec4<f32>(position, 0.0, 1.0);
+  //   }
+  // )";
 
-  const char* fragmentShaderCode = R"(
-    @fragment
-    fn main() -> @location(0) vec4<f32> {
-      return vec4f(1, 0, 0, 1);
-    }
-  )";
+  // const char* fragmentShaderCode = R"(
+  //   @fragment
+  //   fn main() -> @location(0) vec4<f32> {
+  //     return vec4f(1, 0, 0, 1);
+  //   }
+  // )";
 
-   float frame1Data[] = {0.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f}; // 4 vertices
+  float frame1Data[] = {0.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f}; // 4 vertices
 
   this->renderGroup = new RenderGroup(device, swapChain, wgpu::BufferUsage::Vertex, vertexShaderCode, fragmentShaderCode, 1024);
   this->renderGroup->Upload(frame1Data, sizeof(frame1Data));

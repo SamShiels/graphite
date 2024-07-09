@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Include directories
 include_directories(include)
+include_directories(${CMAKE_BINARY_DIR})
 
 # Gather all source files
 set(SOURCES main.cpp)
