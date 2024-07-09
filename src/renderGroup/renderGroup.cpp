@@ -1,5 +1,5 @@
 #include <webgpu/webgpu_cpp.h>
-#include <renderGroup.h>
+#include "renderGroup.h"
 #include <iostream>
 
 RenderGroup::RenderGroup(
@@ -106,14 +106,12 @@ void RenderGroup::CreateBuffer(uint64_t maximumSize) {
   buffer = device.CreateBuffer(&bufferDesc);
 }
 
-void RenderGroup::Upload(const void* data) {
-  uint64_t size = sizeof(data);
-
+void RenderGroup::Upload(const void* data, uint64_t size) {
   if (size > buffer.GetSize()) {
     std::cout << "Too big!!" << std::endl;
   }
 
-  vertextCount = size;
+  vertextCount = size / (2 * sizeof(float));
 
   wgpu::Queue queue = device.GetQueue();
   queue.WriteBuffer(buffer, 0, data, size);
@@ -137,7 +135,7 @@ void RenderGroup::Render() {
   wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderpass);
   pass.SetPipeline(pipeline);
   pass.SetVertexBuffer(0, buffer);
-  pass.Draw(vertextCount / 2); // Divide by dimensions
+  pass.Draw(vertextCount); // Divide by dimensions
   pass.End();
   wgpu::CommandBuffer commands = encoder.Finish();
   device.GetQueue().Submit(1, &commands);

@@ -2,6 +2,7 @@
 #include <graphite.h>
 #include "wgpu_utils.h"
 #include <iostream>
+#include "renderGroup/renderGroup.h"
 
 class Internal {
   public:
@@ -14,7 +15,7 @@ class Internal {
     wgpu::Device device;
     wgpu::SwapChain swapChain;
     wgpu::Surface surface;
-    wgpu::RenderPipeline pipeline;
+    RenderGroup* renderGroup;
     void SetupSwapChain(uint32_t windowWidth, uint32_t windowHeight);
 };
 
@@ -41,21 +42,6 @@ Internal::Internal(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeig
   SetupSwapChain(windowWidth, windowHeight);
 
   const char* vertexShaderCode = R"(
-    @vertex fn vertexMain(@builtin(vertex_index) i : u32) ->
-      @builtin(position) vec4f {
-        const pos = array(vec2f(0, 1), vec2f(-1, -1), vec2f(1, -1));
-        return vec4f(pos[i], 0, 1);
-    }
-  )";
-
-  const char* fragmentShaderCode = R"(
-    @fragment fn fragmentMain() -> @location(0) vec4f {
-        return vec4f(1, 0, 0, 1);
-    }
-  )";
-
-  /*
-  const char* vertexShaderCode = R"(
     @vertex
     fn main(@location(0) position: vec2<f32>) -> @builtin(position) vec4<f32> {
       return vec4<f32>(position, 0.0, 1.0);
@@ -64,36 +50,19 @@ Internal::Internal(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeig
 
   const char* fragmentShaderCode = R"(
     @fragment
-    fn main() -> @location(0) vec4f<f32> {
+    fn main() -> @location(0) vec4<f32> {
       return vec4f(1, 0, 0, 1);
     }
   )";
-  */
 
-  this->pipeline = CreateRenderPipeline(device, vertexShaderCode, fragmentShaderCode);
+   float frame1Data[] = {0.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f}; // 4 vertices
+
+  this->renderGroup = new RenderGroup(device, swapChain, wgpu::BufferUsage::Vertex, vertexShaderCode, fragmentShaderCode, 1024);
+  this->renderGroup->Upload(frame1Data, sizeof(frame1Data));
 }
 
 void Internal::Render() {
-  wgpu::RenderPassColorAttachment attachment
-  {
-    .view = swapChain.GetCurrentTextureView(),
-    .loadOp = wgpu::LoadOp::Clear,
-    .storeOp = wgpu::StoreOp::Store
-  };
-
-  wgpu::RenderPassDescriptor renderpass
-  {
-    .colorAttachmentCount = 1,
-    .colorAttachments = &attachment
-  };
-
-  wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-  wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderpass);
-  pass.SetPipeline(pipeline);
-  pass.Draw(3);
-  pass.End();
-  wgpu::CommandBuffer commands = encoder.Finish();
-  device.GetQueue().Submit(1, &commands);
+  this->renderGroup->Render();
 
   swapChain.Present();
   instance.ProcessEvents();
