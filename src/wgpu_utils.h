@@ -3,7 +3,8 @@
 
 #include <webgpu/webgpu_cpp.h>
 
-wgpu::Device GetDeviceSync(wgpu::Instance instance);
+wgpu::Adapter requestAdapter(wgpu::Instance instance);
+wgpu::Device requestDevice(wgpu::Adapter adapter);
 wgpu::RenderPipeline CreateRenderPipeline(wgpu::Device device, const char* vertexShaderCode, const char* fragmentShaderCode);
 
 #endif

@@ -4,30 +4,62 @@
 #include <webgpu/webgpu_cpp.h>
 #include <iostream>
 #include "shader/shader.h"
+#include <cassert>
 
-wgpu::Device GetDeviceSync(wgpu::Instance instance) {
-  std::promise<wgpu::Device> devicePromise;
-  std::future<wgpu::Device> deviceFuture = devicePromise.get_future();
+wgpu::Adapter requestAdapter(wgpu::Instance instance) {
+  struct UserData {
+    wgpu::Adapter adapter = nullptr;
+    bool requestEnded = false;
+  };
 
-  instance.RequestAdapter(nullptr, [](WGPURequestAdapterStatus status, WGPUAdapter cAdapter, const char* message, void* userData) {
-    if (status != WGPURequestAdapterStatus_Success) {
-        exit(0);
+  UserData userData;
+
+  auto adapterRequestCallback = [](WGPURequestAdapterStatus status, WGPUAdapter cAdapter, char const * message, void * pUserData) {
+    UserData& userData = *reinterpret_cast<UserData*>(pUserData);
+    if (status == WGPURequestAdapterStatus::WGPURequestAdapterStatus_Success) {
+      wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
+      userData.adapter = adapter;
+    } else {
+      std::cout << "Could not obtain WebGPU adaper: " << message << std::endl;
     }
 
-    wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
-    adapter.RequestDevice(nullptr, [](WGPURequestDeviceStatus status, WGPUDevice cDevice, const char* message, void* userData) {
-        wgpu::Device device = wgpu::Device::Acquire(cDevice);
+    userData.requestEnded = true;
+  };
 
-        device.SetUncapturedErrorCallback([](WGPUErrorType type, const char* message, void* userData) {
+  instance.RequestAdapter(nullptr, adapterRequestCallback, &userData);
+  assert(userData.requestEnded);
+
+  return userData.adapter;
+}
+
+wgpu::Device requestDevice(wgpu::Adapter adapter) {
+  struct UserData {
+    wgpu::Device device = nullptr;
+    bool requestEnded = false;
+  };
+
+  UserData userData;
+
+  auto deviceRequestCallback = [](WGPURequestDeviceStatus status, WGPUDevice cDevice, const char* message, void * pUserData) {
+    UserData& userData = *reinterpret_cast<UserData*>(pUserData);
+    if (status == WGPURequestDeviceStatus::WGPURequestDeviceStatus_Success) {
+      wgpu::Device device = wgpu::Device::Acquire(cDevice);
+      userData.device = device;
+
+      auto errorCallback = [](WGPUErrorType type, const char* message, void* pUserData) {
         std::cout << "Error: " << type << " - message: " << message;
-        }, nullptr);
+      };
 
-        std::promise<wgpu::Device>* devicePromise = reinterpret_cast<std::promise<wgpu::Device>*>(userData);
-        devicePromise->set_value(device);
-    }, userData);
-  }, reinterpret_cast<void*>(&devicePromise));
+      device.SetUncapturedErrorCallback(errorCallback, nullptr);
+    }
 
-  return deviceFuture.get();
+    userData.requestEnded = true;
+  };
+
+  adapter.RequestDevice(nullptr, deviceRequestCallback, &userData);
+  assert(userData.requestEnded);
+
+  return userData.device;
 }
 
 wgpu::RenderPipeline CreateRenderPipeline(wgpu::Device device, const char* vertexShaderCode, const char* fragmentShaderCode) {
@@ -62,12 +94,13 @@ wgpu::RenderPipeline CreateRenderPipeline(wgpu::Device device, const char* verte
   wgpu::RenderPipelineDescriptor descriptor
   {
     .vertex = {
-      .module = vertexShaderModule
+      .module = vertexShaderModule,
     },
     .primitive = primitiveState,
     .multisample = multisampleState,
     .fragment = &fragmentState
   };
 
-  return device.CreateRenderPipeline(&descriptor);
+  wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+  return pipeline;
 }

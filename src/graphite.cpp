@@ -1,6 +1,7 @@
 #include <webgpu/webgpu_glfw.h>
 #include <graphite.h>
 #include "wgpu_utils.h"
+#include <iostream>
 
 class Internal {
   public:
@@ -30,7 +31,13 @@ Graphite::~Graphite() {
 Internal::Internal(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeight) {
   this->instance = wgpu::CreateInstance();
   this->surface = wgpu::glfw::CreateSurfaceForWindow(instance, window);
-  device = GetDeviceSync(instance);
+
+  std::cout << "Requesting adapter..." << std::endl;
+  wgpu::Adapter adapter = requestAdapter(this->instance);
+
+  std::cout << "Requesting device..." << std::endl;
+  device = requestDevice(adapter);
+
   SetupSwapChain(windowWidth, windowHeight);
 
   const char* vertexShaderCode = R"(
@@ -46,6 +53,22 @@ Internal::Internal(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeig
         return vec4f(1, 0, 0, 1);
     }
   )";
+
+  /*
+  const char* vertexShaderCode = R"(
+    @vertex
+    fn main(@location(0) position: vec2<f32>) -> @builtin(position) vec4<f32> {
+      return vec4<f32>(position, 0.0, 1.0);
+    }
+  )";
+
+  const char* fragmentShaderCode = R"(
+    @fragment
+    fn main() -> @location(0) vec4f<f32> {
+      return vec4f(1, 0, 0, 1);
+    }
+  )";
+  */
 
   this->pipeline = CreateRenderPipeline(device, vertexShaderCode, fragmentShaderCode);
 }
