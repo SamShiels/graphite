@@ -90,7 +90,7 @@ void Internal::Render(Scene scene) {
   }
 
   float frame1Data[] = {0.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f}; // 4 vertices
-  uint16_t frame1DataI[] = {0, 1, 2, 0}; // 4 vertices
+  int frame1DataI[] = {0, 1, 2}; // 4 vertices
 
   uint64_t vertexSize = sizeof(frame1Data);
   uint64_t indexSize = sizeof(frame1DataI);

@@ -16,8 +16,8 @@ class RenderGroup {
 
     ~RenderGroup();
 
-    void UploadPositions(const void* data, uint16_t size);
-    void UploadIndices(const void* data, uint16_t size);
+    void UploadPositions(const void* data, int size);
+    void UploadIndices(const void* data, int size);
     void Render();
 
   private:

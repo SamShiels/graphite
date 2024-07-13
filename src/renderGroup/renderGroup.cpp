@@ -116,7 +116,7 @@ void RenderGroup::CreateIndexBuffer(uint64_t maximumSize) {
   indexBuffer = device.CreateBuffer(&bufferDesc);
 }
 
-void RenderGroup::UploadPositions(const void* data, uint16_t size) {
+void RenderGroup::UploadPositions(const void* data, int size) {
   if (size > buffer.GetSize()) {
     std::cout << "Too big!!" << std::endl;
   }
@@ -127,12 +127,12 @@ void RenderGroup::UploadPositions(const void* data, uint16_t size) {
   queue.WriteBuffer(buffer, 0, data, size);
 }
 
-void RenderGroup::UploadIndices(const void* data, uint16_t size) {
+void RenderGroup::UploadIndices(const void* data, int size) {
   if (size > indexBuffer.GetSize()) {
     std::cout << "Too big!!" << std::endl;
   }
 
-  indexCount = size / sizeof(uint16_t);
+  indexCount = size / sizeof(int);
 
   wgpu::Queue queue = device.GetQueue();
   queue.WriteBuffer(indexBuffer, 0, data, size);
@@ -156,7 +156,7 @@ void RenderGroup::Render() {
   wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderpass);
   pass.SetPipeline(pipeline);
   pass.SetVertexBuffer(0, buffer);
-  pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint16);
+  pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
   pass.DrawIndexed(indexCount);
   pass.End();
   wgpu::CommandBuffer commands = encoder.Finish();
