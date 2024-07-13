@@ -50,7 +50,7 @@ void RenderGroup::CreateRenderPipeline(const char* vertexShaderCode, const char*
 
   wgpu::PrimitiveState primitiveState = {
     .topology = wgpu::PrimitiveTopology::TriangleList,
-    .frontFace = wgpu::FrontFace::CW,
+    .frontFace = wgpu::FrontFace::CCW,
     .cullMode = wgpu::CullMode::None
   };
 

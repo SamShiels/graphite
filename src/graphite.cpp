@@ -59,32 +59,35 @@ void Internal::SetupSwapChain(uint32_t windowWidth, uint32_t windowHeight) {
 }
 
 void Internal::Render(Scene scene) {
-  float* vertices = new float[scene.sprites.size() * 8];
-  uint16_t* indices = new uint16_t[scene.sprites.size() * 6];
+  std::vector<float> vertices;
+  std::vector<int> indices;
 
-  uint16_t indexBase = 0;
+  vertices.reserve(scene.sprites.size() * 8);  // 4 vertices per sprite
+  indices.reserve(scene.sprites.size() * 6);   // 6 indices per sprite
 
-  for (uint32_t i = 0; i < scene.sprites.size(); i++) {
+  int indexBase = 0;
+
+  for (int i = 0; i < scene.sprites.size(); i++) {
     Sprite sprite = scene.sprites[i];
 
-    vertices[i]     = sprite.position.x;
-    vertices[i + 1] = sprite.position.y;
+    vertices.push_back(sprite.position.x);
+    vertices.push_back(sprite.position.y);
 
-    vertices[i + 2] = sprite.position.x + sprite.width;
-    vertices[i + 3] = sprite.position.y;
+    vertices.push_back(sprite.position.x + sprite.width);
+    vertices.push_back(sprite.position.y);
 
-    vertices[i + 4] = sprite.position.x + sprite.width;
-    vertices[i + 5] = sprite.position.y + sprite.height;
+    vertices.push_back(sprite.position.x + sprite.width);
+    vertices.push_back(sprite.position.y + sprite.height);
 
-    vertices[i + 6] = sprite.position.x;
-    vertices[i + 7] = sprite.position.y + sprite.height;
+    vertices.push_back(sprite.position.x);
+    vertices.push_back(sprite.position.y + sprite.height);
 
-    indices[i]     = indexBase;
-    indices[i + 1] = indexBase + 1;
-    indices[i + 2] = indexBase + 2;
-    indices[i + 3] = indexBase + 2;
-    indices[i + 4] = indexBase + 1;
-    indices[i + 5] = indexBase + 3;
+    indices.push_back(indexBase);
+    indices.push_back(indexBase + 1);
+    indices.push_back(indexBase + 2);
+    indices.push_back(indexBase);
+    indices.push_back(indexBase + 2);
+    indices.push_back(indexBase + 3);
 
     indexBase += 4;
   }
@@ -92,11 +95,11 @@ void Internal::Render(Scene scene) {
   float frame1Data[] = {0.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f}; // 4 vertices
   int frame1DataI[] = {0, 1, 2}; // 4 vertices
 
-  uint64_t vertexSize = sizeof(frame1Data);
-  uint64_t indexSize = sizeof(frame1DataI);
+  int vertexSize = vertices.size() * sizeof(float);
+  int indexSize = indices.size() * sizeof(int);
 
-  this->renderGroup->UploadPositions(frame1Data, vertexSize);
-  this->renderGroup->UploadIndices(frame1DataI, indexSize);
+  this->renderGroup->UploadPositions(vertices.data(), vertexSize);
+  this->renderGroup->UploadIndices(indices.data(), indexSize);
   this->renderGroup->Render();
 
   swapChain.Present();
