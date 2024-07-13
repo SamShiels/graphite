@@ -18,9 +18,14 @@ int main() {
 
   Graphite* graphite = new Graphite(window, kWidth, kHeight);
 
+  Scene scene;
+
+  scene.sprites = {};
+  scene.sprites.push_back({glm::vec3(0.01f, 0.01f, 0.0f), 0.2f, 0.2f});
+
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
-    graphite->Render();
+    graphite->Render(scene);
   }
 
   delete graphite;

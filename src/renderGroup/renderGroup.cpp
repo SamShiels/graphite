@@ -15,6 +15,7 @@ RenderGroup::RenderGroup(
   this->bufferUsage = bufferUsage;
 
   CreateBuffer(maximumSize);
+  CreateIndexBuffer(maximumSize);
   CreateRenderPipeline(vertexShaderCode, fragmentShaderCode);
 }
 
@@ -49,7 +50,7 @@ void RenderGroup::CreateRenderPipeline(const char* vertexShaderCode, const char*
 
   wgpu::PrimitiveState primitiveState = {
     .topology = wgpu::PrimitiveTopology::TriangleList,
-    .frontFace = wgpu::FrontFace::CCW,
+    .frontFace = wgpu::FrontFace::CW,
     .cullMode = wgpu::CullMode::None
   };
 
@@ -106,15 +107,35 @@ void RenderGroup::CreateBuffer(uint64_t maximumSize) {
   buffer = device.CreateBuffer(&bufferDesc);
 }
 
-void RenderGroup::Upload(const void* data, uint64_t size) {
+void RenderGroup::CreateIndexBuffer(uint64_t maximumSize) {
+  wgpu::BufferDescriptor bufferDesc = {};
+  bufferDesc.size = maximumSize * sizeof(uint16_t);
+  bufferDesc.label = "Index buffer";
+  bufferDesc.usage = wgpu::BufferUsage::Index | wgpu::BufferUsage::CopyDst;
+
+  indexBuffer = device.CreateBuffer(&bufferDesc);
+}
+
+void RenderGroup::UploadPositions(const void* data, uint16_t size) {
   if (size > buffer.GetSize()) {
     std::cout << "Too big!!" << std::endl;
   }
 
-  vertextCount = size / (2 * sizeof(float));
+  vertexCount = size / (2 * sizeof(float));
 
   wgpu::Queue queue = device.GetQueue();
   queue.WriteBuffer(buffer, 0, data, size);
+}
+
+void RenderGroup::UploadIndices(const void* data, uint16_t size) {
+  if (size > indexBuffer.GetSize()) {
+    std::cout << "Too big!!" << std::endl;
+  }
+
+  indexCount = size / sizeof(uint16_t);
+
+  wgpu::Queue queue = device.GetQueue();
+  queue.WriteBuffer(indexBuffer, 0, data, size);
 }
 
 void RenderGroup::Render() {
@@ -135,7 +156,8 @@ void RenderGroup::Render() {
   wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderpass);
   pass.SetPipeline(pipeline);
   pass.SetVertexBuffer(0, buffer);
-  pass.Draw(vertextCount); // Divide by dimensions
+  pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint16);
+  pass.DrawIndexed(indexCount);
   pass.End();
   wgpu::CommandBuffer commands = encoder.Finish();
   device.GetQueue().Submit(1, &commands);
