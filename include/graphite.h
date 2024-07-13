@@ -20,7 +20,7 @@ class Internal;
 class Graphite {
   public:
     Graphite(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeight);
-    void Render(Scene scene);
+    void Render(const Scene& scene);
     ~Graphite();
 
   private:

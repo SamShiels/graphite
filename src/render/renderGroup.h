@@ -1,6 +1,7 @@
 #ifndef RENDERGROUP_H
 #define RENDERGROUP_H
 
+#include "buffer.h"
 #include <webgpu/webgpu_cpp.h>
 
 class RenderGroup {
@@ -8,7 +9,6 @@ class RenderGroup {
     RenderGroup(
       wgpu::Device device,
       wgpu::SwapChain swapChain,
-      wgpu::BufferUsage bufferUsage,
       const char* vertexShaderCode,
       const char* fragmentShaderCode,
       uint64_t maximumSize
@@ -25,17 +25,13 @@ class RenderGroup {
     wgpu::SwapChain swapChain;
     wgpu::RenderPassDescriptor renderPass;
     wgpu::RenderPipeline pipeline;
-    wgpu::Buffer buffer;
-    wgpu::Buffer indexBuffer;
-    wgpu::BufferUsage bufferUsage;
-
-    uint64_t vertexCount;
+    Buffer* buffer;
+    Buffer* indexBuffer;
+    
     uint64_t indexCount;
 
     wgpu::ShaderModule CreateShaderModule(const char* shaderCode);
     void CreateRenderPipeline(const char* vertexShaderCode, const char* fragmentShaderCode);
-    void CreateBuffer(uint64_t maximumSize);
-    void CreateIndexBuffer(uint64_t maximumSize);
 };
 
 #endif // RENDERGROUP_H

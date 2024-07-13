@@ -2,13 +2,13 @@
 #include <graphite.h>
 #include "wgpu_utils.h"
 #include <iostream>
-#include "renderGroup/renderGroup.h"
+#include "render/renderGroup.h"
 #include "embedded_shaders.h"
 
 class Internal {
   public:
     Internal(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeight);
-    void Render(Scene scene);
+    void Render(const Scene& scene);
     ~Internal();
 
   private:
@@ -22,7 +22,7 @@ class Internal {
 
 Graphite::Graphite(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeight) : internal(new Internal(window, windowWidth, windowHeight)) {}
 
-void Graphite::Render(Scene scene) {
+void Graphite::Render(const Scene& scene) {
   internal->Render(scene);
 }
 
@@ -44,7 +44,7 @@ Internal::Internal(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeig
 
   // float frame1Data[] = {0.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f}; // 4 vertices
 
-  this->renderGroup = new RenderGroup(device, swapChain, wgpu::BufferUsage::Vertex, vertexShaderCode, fragmentShaderCode, 1024);
+  this->renderGroup = new RenderGroup(device, swapChain, vertexShaderCode, fragmentShaderCode, 1024);
   // this->renderGroup->Upload(frame1Data, sizeof(frame1Data));
 }
 
@@ -58,7 +58,7 @@ void Internal::SetupSwapChain(uint32_t windowWidth, uint32_t windowHeight) {
   swapChain = device.CreateSwapChain(surface, &scDesc);
 }
 
-void Internal::Render(Scene scene) {
+void Internal::Render(const Scene& scene) {
   std::vector<float> vertices;
   std::vector<int> indices;
 
@@ -107,5 +107,5 @@ void Internal::Render(Scene scene) {
 }
 
 Internal::~Internal() {
-  
+  delete renderGroup;
 }

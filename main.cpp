@@ -4,8 +4,8 @@
 #include <webgpu/webgpu_glfw.h>
 #include <graphite.h>
 
-const uint32_t kWidth = 512;
-const uint32_t kHeight = 512;
+const uint32_t kWidth = 800;
+const uint32_t kHeight = 800;
 
 int main() {
   if (!glfwInit()) {

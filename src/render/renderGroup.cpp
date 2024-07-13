@@ -1,21 +1,20 @@
 #include <webgpu/webgpu_cpp.h>
+#include "buffer.h"
 #include "renderGroup.h"
 #include <iostream>
 
 RenderGroup::RenderGroup(
     wgpu::Device device, 
     wgpu::SwapChain swapChain, 
-    wgpu::BufferUsage bufferUsage, 
     const char* vertexShaderCode, 
     const char* fragmentShaderCode,
     uint64_t maximumSize
   ) {
   this->device = device;
   this->swapChain = swapChain;
-  this->bufferUsage = bufferUsage;
 
-  CreateBuffer(maximumSize);
-  CreateIndexBuffer(maximumSize);
+  this->buffer = new Buffer(device, "Position buffer", maximumSize, BufferUsage::Vertex);
+  this->indexBuffer = new Buffer(device, "Index buffer", maximumSize, BufferUsage::Index);
   CreateRenderPipeline(vertexShaderCode, fragmentShaderCode);
 }
 
@@ -99,43 +98,13 @@ void RenderGroup::CreateRenderPipeline(const char* vertexShaderCode, const char*
   this->pipeline = device.CreateRenderPipeline(&descriptor);
 }
 
-void RenderGroup::CreateBuffer(uint64_t maximumSize) {
-  wgpu::BufferDescriptor bufferDesc = {};
-  bufferDesc.size = maximumSize * sizeof(float);
-  bufferDesc.usage = this->bufferUsage | wgpu::BufferUsage::CopyDst;
-
-  buffer = device.CreateBuffer(&bufferDesc);
-}
-
-void RenderGroup::CreateIndexBuffer(uint64_t maximumSize) {
-  wgpu::BufferDescriptor bufferDesc = {};
-  bufferDesc.size = maximumSize * sizeof(uint16_t);
-  bufferDesc.label = "Index buffer";
-  bufferDesc.usage = wgpu::BufferUsage::Index | wgpu::BufferUsage::CopyDst;
-
-  indexBuffer = device.CreateBuffer(&bufferDesc);
-}
-
 void RenderGroup::UploadPositions(const void* data, int size) {
-  if (size > buffer.GetSize()) {
-    std::cout << "Too big!!" << std::endl;
-  }
-
-  vertexCount = size / (2 * sizeof(float));
-
-  wgpu::Queue queue = device.GetQueue();
-  queue.WriteBuffer(buffer, 0, data, size);
+  buffer->Upload(data, size);
 }
 
 void RenderGroup::UploadIndices(const void* data, int size) {
-  if (size > indexBuffer.GetSize()) {
-    std::cout << "Too big!!" << std::endl;
-  }
-
   indexCount = size / sizeof(int);
-
-  wgpu::Queue queue = device.GetQueue();
-  queue.WriteBuffer(indexBuffer, 0, data, size);
+  indexBuffer->Upload(data, size);
 }
 
 void RenderGroup::Render() {
@@ -155,10 +124,23 @@ void RenderGroup::Render() {
   wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
   wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderpass);
   pass.SetPipeline(pipeline);
-  pass.SetVertexBuffer(0, buffer);
-  pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+  pass.SetVertexBuffer(0, buffer->GetWGPUBuffer());
+  pass.SetIndexBuffer(indexBuffer->GetWGPUBuffer(), wgpu::IndexFormat::Uint32);
   pass.DrawIndexed(indexCount);
   pass.End();
   wgpu::CommandBuffer commands = encoder.Finish();
   device.GetQueue().Submit(1, &commands);
+}
+
+RenderGroup::~RenderGroup() {
+  delete buffer;
+  delete indexBuffer;
+
+  buffer = nullptr;
+  indexBuffer = nullptr;
+
+  device = nullptr;
+  swapChain = nullptr;
+  pipeline = nullptr;
+  indexCount = 0;
 }
