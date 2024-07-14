@@ -1,6 +1,6 @@
-set(SHADER_SOURCES graphite.cpp wgpu_utils.cpp)
-set(HEADER_FILES wgpu_utils.h)
+set(SHADER_SOURCES graphite.cpp renderObject.cpp transform.cpp)
 
+add_subdirectory(utils)
 add_subdirectory(render)
 add_subdirectory(shaders)
 

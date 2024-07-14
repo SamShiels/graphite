@@ -1,6 +1,6 @@
 #include <webgpu/webgpu_glfw.h>
 #include <graphite.h>
-#include "wgpu_utils.h"
+#include "utils/wgpu_utils.h"
 #include <iostream>
 #include "render/renderGroup.h"
 #include "embedded_shaders.h"
@@ -41,11 +41,7 @@ Internal::Internal(GLFWwindow* window, uint32_t windowWidth, uint32_t windowHeig
   device = requestDevice(adapter);
 
   SetupSwapChain(windowWidth, windowHeight);
-
-  // float frame1Data[] = {0.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f}; // 4 vertices
-
   this->renderGroup = new RenderGroup(device, swapChain, vertexShaderCode, fragmentShaderCode, 1024);
-  // this->renderGroup->Upload(frame1Data, sizeof(frame1Data));
 }
 
 void Internal::SetupSwapChain(uint32_t windowWidth, uint32_t windowHeight) {
@@ -91,9 +87,6 @@ void Internal::Render(const Scene& scene) {
 
     indexBase += 4;
   }
-
-  float frame1Data[] = {0.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f}; // 4 vertices
-  int frame1DataI[] = {0, 1, 2}; // 4 vertices
 
   int vertexSize = vertices.size() * sizeof(float);
   int indexSize = indices.size() * sizeof(int);
