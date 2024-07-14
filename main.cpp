@@ -3,6 +3,7 @@
 #include <webgpu/webgpu_cpp.h>
 #include <webgpu/webgpu_glfw.h>
 #include <graphite.h>
+#include <sprite.h>
 
 const uint32_t kWidth = 800;
 const uint32_t kHeight = 800;
@@ -21,7 +22,9 @@ int main() {
   Scene scene;
 
   scene.sprites = {};
-  scene.sprites.push_back({glm::vec3(0.01f, 0.01f, 0.0f), 0.2f, 0.2f});
+
+  Sprite sprite = Sprite(0.2, 0.2);
+  scene.sprites.push_back(sprite);
 
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();

@@ -66,17 +66,19 @@ void Internal::Render(const Scene& scene) {
   for (int i = 0; i < scene.sprites.size(); i++) {
     Sprite sprite = scene.sprites[i];
 
-    vertices.push_back(sprite.position.x);
-    vertices.push_back(sprite.position.y);
+    glm::vec3 position = sprite.transform.getPosition();
 
-    vertices.push_back(sprite.position.x + sprite.width);
-    vertices.push_back(sprite.position.y);
+    vertices.push_back(position.x);
+    vertices.push_back(position.y);
 
-    vertices.push_back(sprite.position.x + sprite.width);
-    vertices.push_back(sprite.position.y + sprite.height);
+    vertices.push_back(position.x + sprite.width);
+    vertices.push_back(position.y);
 
-    vertices.push_back(sprite.position.x);
-    vertices.push_back(sprite.position.y + sprite.height);
+    vertices.push_back(position.x + sprite.width);
+    vertices.push_back(position.y + sprite.height);
+
+    vertices.push_back(position.x);
+    vertices.push_back(position.y + sprite.height);
 
     indices.push_back(indexBase);
     indices.push_back(indexBase + 1);

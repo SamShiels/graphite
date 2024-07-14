@@ -1,4 +1,4 @@
-set(SHADER_SOURCES graphite.cpp renderObject.cpp transform.cpp)
+set(SHADER_SOURCES graphite.cpp renderObject.cpp mesh.cpp sprite.cpp transform.cpp)
 
 add_subdirectory(utils)
 add_subdirectory(render)

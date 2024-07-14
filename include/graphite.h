@@ -4,12 +4,7 @@
 #include <webgpu/webgpu_cpp.h>
 #include <vector>
 #include <glm/glm.hpp>
-
-struct Sprite {
-  glm::vec3 position;
-  float width;
-  float height;
-};
+#include <sprite.h>
 
 struct Scene {
   std::vector<Sprite> sprites;

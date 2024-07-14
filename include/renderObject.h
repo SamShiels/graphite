@@ -6,7 +6,7 @@
 
 class RenderObject {
   public:
-    RenderObject() : transform() {};
+    RenderObject();
     Transform transform;
 };
 
